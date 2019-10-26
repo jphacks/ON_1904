@@ -1,7 +1,7 @@
 // LINEアクセストークン
 const LINE_TOKEN = process.env.ACCESS_TOKEN;
 
-const request = require('request');
+const line = require('@line/bot-sdk');
 
 // 成功時のレスポンス
 const createResponse = (statusCode, body) => {
@@ -12,6 +12,20 @@ const createResponse = (statusCode, body) => {
         },
         body: JSON.stringify(body)
     }
+};
+
+// LINEへのReply
+const replyLine = (repToken, resStr) => {
+  const client = new line.Client({
+    channelAccessToken: LINE_TOKEN
+  });
+
+  const message = {
+    type: 'text',
+    text: resStr
+  };
+
+  return client.replyMessage(repToken, message);
 };
 
 // メイン処理
@@ -32,36 +46,4 @@ exports.handler = (event, context) => {
       context.succeed(createResponse(200, 'Completed successfully !!'));
     });
   }
-}
-
-// LINEへのReply
-function replyLine(repToken, resStr) {
-  return new Promise((resolve, reject) => {
-    const url = 'https://api.line.me/v2/bot/message/reply';
-
-    let options = {
-      uri: url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${LINE_TOKEN}`
-      },
-      json: {
-        "replyToken": repToken,
-        "messages": [{
-          "type": "text",
-          "text": resStr
-        }]
-      }
-  };
-  request.post(options, function (error, response, body) {
-      if (!error) {
-        console.log('Success: Communication successful completion !!');
-        console.log(body);
-        resolve();
-      } else {
-        console.log(`Failed: ${error}`);
-        resolve();
-      }
-    });
-  });
 }
