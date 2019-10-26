@@ -1,6 +1,7 @@
 const line = require('@line/bot-sdk');
+const fs = require('fs');
 
-const client = line.Client({
+const client = new line.Client({
   channelAccessToken: 'nsd+2su2ajyD0DCbsMtggkZfsi2/JaXirfSwI4WWtUF0vg25CE1Jy27FstR7sSE0aqMhQ22Kk4w3MCCo6EzzCfgbEHBsU4boPCfCl7RK4Vu9fUPaHeGQUT4XOdsf/UO36OVWTExp/f+QHsJWvjJdyQdB04t89/1O/w1cDnyilFU='
 });
 
@@ -9,7 +10,7 @@ const richmenu = {
       "width":2500,
       "height":1686
   },
-  "selected":false,
+  "selected":true,
   "name":"Controller",
   "chatBarText":"Controller",
   "areas":[
@@ -90,5 +91,13 @@ const richmenu = {
 
 client.createRichMenu(richmenu)
   .then((richMenuId) => {
-    client.setRichMenuImage(richMenuId, fs.createReadStream('../../../icons/performer/rich_menu.png'));
+    client.setRichMenuImage(richMenuId, fs.createReadStream('../../../icons/performer/rich_menu.png'))
+      .then(() => {
+        client.setDefaultRichMenu(richMenuId);
+      });
+  });
+
+client.getRichMenuList()
+  .then((richmenus) => {
+    richmenus.forEach((richmenu) => console.log(richmenu));
   });
