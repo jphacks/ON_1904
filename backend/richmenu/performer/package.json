@@ -1,0 +1,14 @@
+{
+  "name": "performer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "893pro",
+  "license": "MIT",
+  "dependencies": {
+    "@line/bot-sdk": "^6.8.2"
+  }
+}

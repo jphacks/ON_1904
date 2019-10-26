@@ -1,0 +1,23 @@
+{
+  "name": "stbeatechperformer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jphacks/ON_1904.git"
+  },
+  "author": "893pro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jphacks/ON_1904/issues"
+  },
+  "homepage": "https://github.com/jphacks/ON_1904#readme",
+  "dependencies": {
+    "@line/bot-sdk": "^6.8.2",
+    "request": "^2.88.0"
+  }
+}
