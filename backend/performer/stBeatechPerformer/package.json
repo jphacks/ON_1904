@@ -18,6 +18,7 @@
   "homepage": "https://github.com/jphacks/ON_1904#readme",
   "dependencies": {
     "@line/bot-sdk": "^6.8.2",
+    "aws-sdk": "^2.556.0",
     "request": "^2.88.0"
   }
 }

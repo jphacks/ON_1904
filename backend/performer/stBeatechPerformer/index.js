@@ -1,7 +1,9 @@
 // LINEアクセストークン
 const LINE_TOKEN = process.env.ACCESS_TOKEN;
+const SPOTFIY_TOKEN = process.env.SPOTFIY_TOKEN;
 
 const line = require('@line/bot-sdk');
+const request = require('request');
 
 // 成功時のレスポンス
 const createResponse = (statusCode, body) => {
@@ -42,7 +44,53 @@ exports.handler = (event, context) => {
     context.succeed(createResponse(200, 'Completed successfully !!'));
     console.log("Success: Response completed successfully !!");
   } else {
-    return replyLine(repToken, reqText).then(() => {
+    let resText = '';
+    switch(reqText) {
+      case 'setlist':
+        resText = 'spotifyのプレイリストのURLを送信してください';
+        break;
+      default:
+        if (reqText.match(/^https:\/\/open.spotify.com\/playlist\/[0-9a-zA-Z]+$/)) {
+          [playlistId] = reqText.match(/[0-9a-zA-Z]+$/);
+          // spotify token取得
+          const options = {
+            uri: 'https://accounts.spotify.com/api/token',
+            headers: {
+              Authorization: `Basic ${SPOTFIY_TOKEN}`
+            },
+            form: {
+              "grant_type": "client_credentials"
+            }
+          };
+          request.post(options, (error, response, body) => {
+            if(body) {
+              const spotifyAccessToken = JSON.parse(body).access_token;
+              const get_options = {
+                headers: {
+                  Authorization: `Bearer ${spotifyAccessToken}`
+                }
+              };
+              console.log({spotifyAccessToken});
+              request.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, get_options, (g_error, g_response, g_body) => {
+                console.log(JSON.parse(g_body));
+                if(g_body) {
+                  JSON.parse(g_body).items.forEach((el) => {
+                    console.log(`name : ${el.track.name}`);
+                  });
+                }
+              });
+            }
+            if(error) {
+              console.log(error);
+            }
+          });
+          resText = `playlistId : ${playlistId}`;
+        } else {
+          resText = '不正なリクエストです';
+        }
+        break;
+    }
+    return replyLine(repToken, resText).then(() => {
       context.succeed(createResponse(200, 'Completed successfully !!'));
     });
   }
