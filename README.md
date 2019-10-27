@@ -49,22 +49,31 @@ Spotifyのプレイリストと連携するので、すぐに聴くこともSNS�
 
 
 ## 開発内容・開発技術
+* 演者用デバイス
+* AWSで制作したAPI
+* LINE Messaging APIを用いたアプリケーション
+
 ### 活用した技術
+* BLE(Bluetooth Low Enagey)
+
 #### API・データ
-* 
-* 
-* 
+* LINE Messaging API
+* AWS lambda
+* AWS Gateway
+* DynamoDB
+* Spotify API
 
 #### フレームワーク・ライブラリ・モジュール
 * 
 * 
 
 #### デバイス
-* 
-* 
+* 演者用デバイス
+    * LINE Beacon 
+* スマートフォン
 
 
 ### 独自開発技術（Hack Dayで開発したもの）
 #### 2日間に開発した独自の機能・技術
-* 独自で開発したものの内容をこちらに記載してください
-* 特に力を入れた部分をファイルリンク、またはcommit_idを記載してください（任意）
+* LINE Beaconを取得し、そのBeaconに紐づけられた演者情報を表示するAPI
+* 演者用に特化した、持ち運び可能なLINE Beaconを搭載した独自デバイス
