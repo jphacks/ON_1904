@@ -4,6 +4,11 @@ const SPOTFIY_TOKEN = process.env.SPOTFIY_TOKEN;
 
 const line = require('@line/bot-sdk');
 const request = require('request');
+const aws = require('aws-sdk');
+
+const tableName = 'stBeatechPerformer';
+
+const dynamoClient = new aws.DynamoDB.DocumentClient({region: 'us-west-2'});
 
 // 成功時のレスポンス
 const createResponse = (statusCode, body) => {
@@ -30,12 +35,35 @@ const replyLine = (repToken, resStr) => {
   return client.replyMessage(repToken, message);
 };
 
+// プレイリストを更新する
+const updateSongs = (userId, songs) => {
+  console.log('updateSongs entered.');
+  const params = {
+    TableName: tableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: 'set songs = :s',
+    ExpressionAttributeValues: {
+      ':s':songs
+    },
+    ReturnValues: "UPDATED_NEW"
+  };
+  dynamoClient.update(params, (err, data) => {
+    if(err) {
+      console.log(`Songs updated filed : ${err}`);
+    }
+    console.log(`Songs updated : ${JSON.parse(data)}`);
+  });
+}
+
 // メイン処理
 exports.handler = (event, context) => {
 
   console.log(event);
 
   const jsonBody = JSON.parse(event.body);
+  const userId = jsonBody.events[0].source.userId;
   const reqText = jsonBody.events[0].message.text;
   const repToken = jsonBody.events[0].replyToken;
 
@@ -74,24 +102,39 @@ exports.handler = (event, context) => {
               request.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, get_options, (g_error, g_response, g_body) => {
                 console.log(JSON.parse(g_body));
                 if(g_body) {
+                  const songs = [];
                   JSON.parse(g_body).items.forEach((el) => {
                     console.log(`name : ${el.track.name}`);
+                    songs.push(el.track.name);
                   });
+                  updateSongs(userId, songs);
+                }
+                if(g_error) {
+                  console.log(g_error);
+                  resText = 'エラーが発生しました。もう一度試してください。';
                 }
               });
             }
             if(error) {
               console.log(error);
+              resText = 'エラーが発生しました。もう一度試してください。';
             }
           });
-          resText = `playlistId : ${playlistId}`;
         } else {
-          resText = '不正なリクエストです';
+          resText = '不正なリクエストです。';
         }
+        resText = 'プレイリストが登録されました。';
         break;
     }
-    return replyLine(repToken, resText).then(() => {
-      context.succeed(createResponse(200, 'Completed successfully !!'));
-    });
+
+    console.log(`Replay Message : ${resText}`);
+
+    return replyLine(repToken, resText)
+      .then(() => {
+        context.succeed(createResponse(200, 'Completed successfully !!'));
+      })
+      .catch((error) => {
+        console.log(`LINE API POST Filed : ${error}`);
+      });
   }
 }
