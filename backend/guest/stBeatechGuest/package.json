@@ -1,0 +1,15 @@
+{
+  "name": "stbeatechguest",
+  "version": "1.0.0",
+  "description": "Guest",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "893pro",
+  "license": "MIT",
+  "dependencies": {
+    "@line/bot-sdk": "^6.8.2",
+    "aws-sdk": "^2.556.0"
+  }
+}
