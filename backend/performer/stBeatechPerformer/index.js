@@ -55,6 +55,75 @@ const updateSongs = (userId, songs) => {
     }
     console.log(`Songs updated : ${JSON.parse(data)}`);
   });
+};
+
+// ライブ状態を更新
+const updateIsPerformed = (userId, isPerformed) => {
+  console.log('updateIsPerformed entered.');
+
+  const params = {
+    TableName: tableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: 'set isPerformed = :p',
+    ExpressionAttributeValues: {
+      ':p':isPerformed
+    },
+    ReturnValues: "UPDATED_NEW"
+  };
+  dynamoClient.update(params, (err, data) => {
+    if(err) {
+      console.log(`Songs updated filed : ${err}`);
+    }
+    console.log(`Songs updated : ${data}`);
+  });
+};
+
+// トラックNoを更新
+const updateTrackNo = (userId, trackNo) => {
+  console.log('updateTrackNo entered.');
+
+  const params = {
+    TableName: tableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: 'set trackNo = :t',
+    ExpressionAttributeValues: {
+      ':t': trackNo
+    },
+    ReturnValues: "UPDATED_NEW"
+  };
+  dynamoClient.update(params, (err, data) => {
+    if(err) {
+      console.log(`Songs updated filed : ${err}`);
+    }
+    console.log(`Songs updated : ${data}`);
+  });
+};
+
+// トラックNoをインクリメント
+const incrementTrackNo = (userId) => {
+  console.log('incrementTrackNo entered.');
+
+  const params = {
+    TableName: tableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: 'set trackNo = trackNo + :t',
+    ExpressionAttributeValues: {
+      ':t': 1
+    },
+    ReturnValues: "UPDATED_NEW"
+  };
+  dynamoClient.update(params, (err, data) => {
+    if(err) {
+      console.log(`Songs updated filed : ${err}`);
+    }
+    console.log(`Songs updated : ${data}`);
+  });
 }
 
 // メイン処理
@@ -74,6 +143,19 @@ exports.handler = (event, context) => {
   } else {
     let resText = '';
     switch(reqText) {
+      case 'start':
+        updateIsPerformed(userId, true);
+        updateTrackNo(userId, 1);
+        resText = 'ライブを開始しました';
+        break;
+      case 'stop':
+        updateIsPerformed(userId, false);
+        resText = 'ライブを終了しました';
+        break;
+      case 'next':
+        incrementTrackNo(userId);
+        resText = '次の曲になりました';
+        break;
       case 'setlist':
         resText = 'spotifyのプレイリストのURLを送信してください';
         break;
@@ -120,10 +202,10 @@ exports.handler = (event, context) => {
               resText = 'エラーが発生しました。もう一度試してください。';
             }
           });
+          resText = 'プレイリストが登録されました。';
         } else {
           resText = '不正なリクエストです。';
         }
-        resText = 'プレイリストが登録されました。';
         break;
     }
 
