@@ -127,7 +127,7 @@ const incrementTrackNo = (userId) => {
 }
 
 // メイン処理
-exports.handler = (event, context) => {
+exports.handler = async (event, context) => {
 
   console.log(event);
 
@@ -211,12 +211,12 @@ exports.handler = (event, context) => {
 
     console.log(`Replay Message : ${resText}`);
 
-    return replyLine(repToken, resText)
-      .then(() => {
-        context.succeed(createResponse(200, 'Completed successfully !!'));
-      })
-      .catch((error) => {
-        console.log(`LINE API POST Filed : ${error}`);
-      });
+    try {
+      await replyLine(repToken, resText);
+      context.succeed(createResponse(200, 'Completed successfully !!'));
+    }
+    catch (error) {
+      console.log(`LINE API POST Filed : ${error}`);
+    }
   }
 }
