@@ -360,9 +360,9 @@ const message = {
           "type": "button",
           "style": "primary",
           "action": {
-            "type": "message",
+            "type": "uri",
             "label": "投げ銭する！",
-            "text": "send"
+            "uri": "http://10.10.10.56"
           }
         }
       ]
@@ -388,10 +388,12 @@ exports.handler = (event, context) => {
 
   const jsonBody = JSON.parse(event.body);
   const repToken = jsonBody.events[0].replyToken;
-  const repText = jsonBody.events[0].message.text;
+  let repText = '';
   let hwid = '';
   if(jsonBody.events[0].type === 'beacon') {
     hwid = jsonBody.events[0].beacon.hwid;
+  } else {
+    repText = jsonBody.events[0].message.text;
   }
 
   // テスト送信
