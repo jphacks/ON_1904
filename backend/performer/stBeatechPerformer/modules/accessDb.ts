@@ -106,6 +106,11 @@ const updateTrackNo = async (userId: string, trackNo: number): Promise<void> => 
   dynamoDb.update(params);
 };
 
+/**
+ * performerのステータスを更新
+ * @param userId
+ * @param state
+ */
 const updatePerformerState = async (userId: string, state: number): Promise<void> => {
   console.log('updatePerformerState entered.');
 
@@ -120,6 +125,116 @@ const updatePerformerState = async (userId: string, state: number): Promise<void
     ExpressionAttributeValues: {
       ':s': {
         N: String(state),
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
+};
+
+/**
+ * 表示名を更新
+ * @param userId
+ * @param name
+ */
+const updateName = async (userId: string, name: string): Promise<void> => {
+  console.log('updateName entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set performerName = :n',
+    ExpressionAttributeValues: {
+      ':n': {
+        S: name,
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
+};
+
+const updatePhotoUrl = async (userId: string, url: string): Promise<void> => {
+  console.log('updatePhotoUrl entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set photoUrl = :u',
+    ExpressionAttributeValues: {
+      ':u': {
+        S: url,
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
+};
+
+const updateDescription = async (userId: string, description: string): Promise<void> => {
+  console.log('updateDescription entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set description = :d',
+    ExpressionAttributeValues: {
+      ':d': {
+        S: description,
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
+};
+
+const updateTwitter = async (userId: string, twitterId: string): Promise<void> => {
+  console.log('updateDescription entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set twitterId = :t',
+    ExpressionAttributeValues: {
+      ':t': {
+        S: twitterId,
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
+};
+
+const updateHwid = async (userId: string, hwid: string): Promise<void> => {
+  console.log('updateDescription entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set hwid = :h',
+    ExpressionAttributeValues: {
+      ':h': {
+        S: hwid,
       },
     },
     ReturnValues: 'UPDATED_NEW',
@@ -158,5 +273,10 @@ export default {
   updateIsPerformed,
   updateTrackNo,
   updatePerformerState,
+  updateName,
+  updatePhotoUrl,
+  updateDescription,
+  updateTwitter,
+  updateHwid,
   incrementTrackNo,
 };

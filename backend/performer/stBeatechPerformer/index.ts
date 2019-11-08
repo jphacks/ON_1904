@@ -1,9 +1,11 @@
+import { GetItemOutput } from 'aws-sdk/clients/dynamodb';
 import response from './modules/response';
 import lineReplay from './modules/lineReply';
+import lineImage from './modules/lineImage';
 import accessDb from './modules/accessDb';
+import s3 from './modules/aws/s3';
 import spotify from './modules/spotify';
 import enums from './modules/enums';
-import { GetItemOutput } from 'aws-sdk/clients/dynamodb';
 
 // メイン処理
 exports.handler = async (event: any, context: any): Promise<void> => {
@@ -95,18 +97,88 @@ exports.handler = async (event: any, context: any): Promise<void> => {
         break;
       }
       case 'profile': {
-        resText = 'ここはプロフィール';
+        if (performerState === enums.performerState.LIVE) {
+          resText = 'LIVE中はプロフィールを変更できません';
+          break;
+        }
+        resText = '表示名を送信してください';
+        accessDb.updatePerformerState(userId, enums.performerState.SET_NAME);
+        break;
+      }
+      case 'hwid': {
+        if (performerState <= enums.performerState.SET_HWID) {
+          resText = 'まだHWIDが設定されていません';
+          break;
+        }
+        resText = `あなたのHWIDは ${userData.Item.hwid.S} です`;
         break;
       }
       default: {
-        if (reqText.match(/^https:\/\/open.spotify.com\/playlist\/[0-9a-zA-Z]+$/)) {
-          const [playlistId] = reqText.match(/[0-9a-zA-Z]+$/);
-          const accessToken = await spotify.getAccessToken();
-          const songs = await spotify.getSetlistSongs(accessToken, playlistId);
-          accessDb.updatePlaylist(userId, songs);
-          resText = 'プレイリストが登録されました。';
-        } else {
-          resText = '不正なリクエストです。';
+        switch (performerState) {
+          case enums.performerState.SET_NAME: {
+            accessDb.updateName(userId, reqText);
+            resText = 'サムネイル画像のURLを送信してください';
+            accessDb.updatePerformerState(userId, enums.performerState.SET_PHOTO);
+            break;
+          }
+          case enums.performerState.SET_PHOTO: {
+            // const { type, id } = jsonBody.events[0].message;
+            // if (type !== 'image') {
+            //   resText = '画像を送信してください';
+            //   break;
+            // }
+            // // 画像データ取得
+            // const imageData: Buffer[] = [];
+            // const imageRes = await lineImage.getLineImage(id);
+            // console.log('Get imageRes');
+            // imageRes
+            //   .on('data', (chunk) => {
+            //     imageData.push(Buffer.from(chunk));
+            //   })
+            //   .on('end', () => {
+            //     console.log('Save Image');
+            //     s3.saveImage(imageData, userId);
+            //   });
+            accessDb.updatePhotoUrl(userId, reqText);
+            resText = 'アピール文章を送信してください';
+            accessDb.updatePerformerState(userId, enums.performerState.SET_DESCRIPTION);
+            break;
+          }
+          case enums.performerState.SET_DESCRIPTION: {
+            accessDb.updateDescription(userId, reqText);
+            resText = 'twitterのIDを送信してください';
+            accessDb.updatePerformerState(userId, enums.performerState.SET_TWITTER);
+            break;
+          }
+          case enums.performerState.SET_TWITTER: {
+            accessDb.updateTwitter(userId, reqText);
+            resText = 'ビーコンのIDを送信してください';
+            accessDb.updatePerformerState(userId, enums.performerState.SET_HWID);
+            break;
+          }
+          case enums.performerState.SET_HWID: {
+            accessDb.updateHwid(userId, reqText);
+            resText = 'spotifyのプレイリストのURLを送信してください';
+            accessDb.updatePerformerState(userId, enums.performerState.SET_SETLIST);
+            break;
+          }
+          case enums.performerState.SET_SETLIST: {
+            if (reqText.match(/^https:\/\/open.spotify.com\/playlist\/[0-9a-zA-Z]+$/)) {
+              const [playlistId] = reqText.match(/[0-9a-zA-Z]+$/);
+              const accessToken = await spotify.getAccessToken();
+              const songs = await spotify.getSetlistSongs(accessToken, playlistId);
+              accessDb.updatePlaylist(userId, songs);
+              resText = 'プレイリストが登録されました。';
+              accessDb.updatePerformerState(userId, enums.performerState.READY);
+            } else {
+              resText = '不正なリクエストです。';
+            }
+            break;
+          }
+          default: {
+            resText = '不正なリクエストです。';
+            break;
+          }
         }
         break;
       }
