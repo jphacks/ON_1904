@@ -1,7 +1,25 @@
-import { UpdateItemInput } from 'aws-sdk/clients/dynamodb';
+import {
+  UpdateItemInput,
+  GetItemInput,
+  GetItemOutput,
+} from 'aws-sdk/clients/dynamodb';
+
 import dynamoDb from './aws/dynamoDb';
 
 const tableName = 'stBeatechPerformer';
+
+const getUserById = async (userId: string): Promise<GetItemOutput> => {
+  console.log(`Started get user by userId(${userId}) from table(${tableName}).`);
+  const params: GetItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+  };
+  return dynamoDb.get(params);
+};
 
 /**
  * プレイリストを更新する
@@ -13,7 +31,7 @@ const updatePlaylist = async (userId: string, songs: Array<string>): Promise<voi
 
   const songAttributeValues = songs.map((song) => {
     const result = {
-      N: song,
+      S: song,
     };
     return result;
   });
@@ -33,7 +51,7 @@ const updatePlaylist = async (userId: string, songs: Array<string>): Promise<voi
     },
     ReturnValues: 'UPDATED_NEW',
   };
-  await dynamoDb.update(params);
+  dynamoDb.update(params);
 };
 
 /**
@@ -54,12 +72,12 @@ const updateIsPerformed = async (userId: string, isPerformed: boolean): Promise<
     UpdateExpression: 'set isPerformed = :p',
     ExpressionAttributeValues: {
       ':p': {
-        B: isPerformed,
+        BOOL: isPerformed,
       },
     },
     ReturnValues: 'UPDATED_NEW',
   };
-  await dynamoDb.update(params);
+  dynamoDb.update(params);
 };
 
 /**
@@ -85,7 +103,28 @@ const updateTrackNo = async (userId: string, trackNo: number): Promise<void> => 
     },
     ReturnValues: 'UPDATED_NEW',
   };
-  await dynamoDb.update(params);
+  dynamoDb.update(params);
+};
+
+const updatePerformerState = async (userId: string, state: number): Promise<void> => {
+  console.log('updatePerformerState entered.');
+
+  const params: UpdateItemInput = {
+    TableName: tableName,
+    Key: {
+      userId: {
+        S: userId,
+      },
+    },
+    UpdateExpression: 'set performerState = :s',
+    ExpressionAttributeValues: {
+      ':s': {
+        N: String(state),
+      },
+    },
+    ReturnValues: 'UPDATED_NEW',
+  };
+  dynamoDb.update(params);
 };
 
 /**
@@ -110,12 +149,14 @@ const incrementTrackNo = async (userId: string): Promise<void> => {
     },
     ReturnValues: 'UPDATED_NEW',
   };
-  await dynamoDb.update(params);
+  dynamoDb.update(params);
 };
 
 export default {
+  getUserById,
   updatePlaylist,
   updateIsPerformed,
   updateTrackNo,
+  updatePerformerState,
   incrementTrackNo,
 };

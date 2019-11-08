@@ -1,6 +1,5 @@
 import request from 'request';
 import httpRequest from './httpRequest';
-import accessDb from './accessDb';
 import { GetAccessTokenResponse, GetSetlistSongsResponse } from '../models/spotifyModel';
 
 const { SPOTIFY_TOKEN } = process.env;
@@ -16,12 +15,14 @@ const getAccessToken = async (): Promise<string> => {
       grant_type: 'client_credentials',
     },
   };
-  const res: GetAccessTokenResponse = await httpRequest.post(options);
+  const resStr: string = await httpRequest.post(options);
+  const res: GetAccessTokenResponse = JSON.parse(resStr);
   const spotifyAccessToken = res.access_token;
+  console.log({ res, spotifyAccessToken });
   return spotifyAccessToken;
 };
 
-const getSetlistSongs = async (userId: string, spotifyAccessToken: string, playlistId: string):
+const getSetlistSongs = async (spotifyAccessToken: string, playlistId: string):
   Promise<Array<string>> => {
   const options: request.Options = {
     uri: `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
@@ -30,7 +31,8 @@ const getSetlistSongs = async (userId: string, spotifyAccessToken: string, playl
     },
   };
   console.log({ spotifyAccessToken });
-  const res: GetSetlistSongsResponse = await httpRequest.get(options);
+  const resStr: string = await httpRequest.get(options);
+  const res: GetSetlistSongsResponse = JSON.parse(resStr);
 
   console.log({ res });
 

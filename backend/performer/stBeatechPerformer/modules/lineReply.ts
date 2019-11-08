@@ -1,4 +1,4 @@
-import { Client, MessageAPIResponseBase, TextMessage } from '@line/bot-sdk';
+import { Client, TextMessage } from '@line/bot-sdk';
 
 const LINE_TOKEN = process.env.ACCESS_TOKEN;
 
@@ -7,7 +7,7 @@ const LINE_TOKEN = process.env.ACCESS_TOKEN;
  * @param repToken Reply Token
  * @param resStr メッセージの本文
  */
-const replyLine = (repToken: string, resStr: string): Promise<MessageAPIResponseBase> => {
+const replyLine = async (repToken: string, resStr: string): Promise<void> => {
   const client = new Client({
     channelAccessToken: LINE_TOKEN,
   });
@@ -17,7 +17,11 @@ const replyLine = (repToken: string, resStr: string): Promise<MessageAPIResponse
     text: resStr,
   };
 
-  return client.replyMessage(repToken, message);
+  try {
+    await client.replyMessage(repToken, message);
+  } catch (err) {
+    console.log(`LINE API POST Filed : ${err}`);
+  }
 };
 
 export default {
