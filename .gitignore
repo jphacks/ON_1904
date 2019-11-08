@@ -126,3 +126,5 @@ public/
 
 *.zip
 nodejs
+dist
+.vscode
