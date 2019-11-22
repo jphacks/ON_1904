@@ -1,5 +1,5 @@
 # St.Beatech (Street Beacon / Beat Tech)
-[![St.Beatech](image.png)](https://youtu.be/LGpqVSJzsiQ)
+[![St.Beatech](image.png)](https://www.youtube.com/watch?v=9hLij3E5S1E)
 
 ## 製品概要
 ### Be × Tech
